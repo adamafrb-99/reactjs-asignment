@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
+import axios from 'axios';
 
 const Create = () => {
   const [title, setTitle] = useState("");
@@ -14,16 +15,53 @@ const Create = () => {
 
     setIsPending(true);
 
-    fetch("http://localhost:8000/blogs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(blog),
-    }).then(() => {
-      console.log("New blog added.");
+    // fetch("http://localhost:8000/blogs", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(blog),
+    // }).then(() => {
+    //   console.log("New blog added.");
+    //   setIsPending(false);
+    //   history.push("/");
+    // });
+
+    axios({
+      method: 'post',
+      url: 'http://localhost:8000/blogs',
+      timeout: 4000, 
+      data: blog
+    })
+    .then(response => {
+      console.log(response);
       setIsPending(false);
       history.push("/");
-    });
+    })
+    .catch(error => console.error('Timeout exceeded'));
   };
+
+  const getTimeIn = () => {
+    const timeNow = new Date().getTime();
+    return parseFloat((timeNow + 1) / 1000).toFixed(0);
+  };
+
+  const isAuthenticated = () => {
+    const expiresIn = localStorage.getItem("expiresIn");
+    if (expiresIn) {
+      if (expiresIn < getTimeIn()) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      history.push("/login");
+    }
+  }, []);
 
   return (
     <div className="create text-center max-w-md my-0 mx-auto">

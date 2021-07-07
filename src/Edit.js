@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
+import axios from 'axios';
 
 const Edit = () => {
   const { id } = useParams();
@@ -17,33 +18,59 @@ const Edit = () => {
 
     setIsPending(true);
 
-    fetch(url, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(blog),
-    }).then(() => {
-      console.log("Blog has been edited.");
+    // fetch(url, {
+    //   method: "PATCH",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(blog),
+    // }).then(() => {
+    //   console.log("Blog has been edited.");
+    //   setIsPending(false);
+    //   history.push("/blogs/" + id);
+    // });
+
+    axios({
+      method: 'patch',
+      url: url,
+      timeout: 4000, 
+      data: blog
+    })
+    .then(response => {
+      console.log(response);
       setIsPending(false);
       history.push("/blogs/" + id);
-    });
+    })
+    .catch(error => console.error('Timeout exceeded'));
+
   };
 
   useEffect(() => {
-    const abortCont = new AbortController();
+    // const abortCont = new AbortController();
 
-    fetch(url, { signal: abortCont.signal })
-      .then((res) => {
-        return res.json();
+    // fetch(url, { signal: abortCont.signal })
+    //   .then((res) => {
+    //     return res.json();
+    //   })
+    //   .then((blog) => {
+    //     setBlog(blog);
+    //     setTitle(blog.title);
+    //     setBody(blog.body);
+    //     setAuthor(blog.author);
+    //   });
+    // return () => {
+    //   abortCont.abort();
+    // };
+
+    axios.get(url)
+      .then(res => {
+        setBlog(res.data);
+        setTitle(res.data.title);
+        setBody(res.data.body);
+        setAuthor(res.data.author);
       })
-      .then((blog) => {
-        setBlog(blog);
-        setTitle(blog.title);
-        setBody(blog.body);
-        setAuthor(blog.author);
+      .catch(err => {
+        console.log(err.message);
       });
-    return () => {
-      abortCont.abort();
-    };
+
   }, [url]);
 
   return (

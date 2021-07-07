@@ -1,21 +1,30 @@
+import axios from "axios";
 import { useParams, useHistory, Link } from "react-router-dom";
 import useFetch from "./useFetch";
 
 const BlogDetails = () => {
   const { id } = useParams();
+  const url = `http://localhost:8000/blogs/${id}`;
   const {
     data: blog,
     isPending,
     error,
-  } = useFetch(`http://localhost:8000/blogs/${id}`);
+  } = useFetch(url);
   const history = useHistory();
 
   const handleClick = () => {
-    fetch(`http://localhost:8000/blogs/${id}`, {
-      method: "DELETE",
-    }).then(() => {
-      history.push("/");
-    });
+    // fetch(`http://localhost:8000/blogs/${id}`, {
+    //   method: "DELETE",
+    // }).then(() => {
+    //   history.push("/");
+    // });
+
+    axios.delete(url)
+      .then(response => {
+        console.log(response);
+        history.push('/');
+      })
+      .catch(err => console.log(err.message))
   };
 
   return (
